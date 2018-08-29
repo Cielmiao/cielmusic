@@ -1,6 +1,6 @@
 <template>
   <div class="recommend">
-  	<scroll class="recommend-content" :data="discList">
+  	<scroll class="recommend-content" :data="discList" ref="scroll">
       <div>
     		<div v-if="recommends.length" class="slider-wrapper">
     			<slider>
@@ -18,7 +18,7 @@
     			<ul> 
               <li v-for="item in discList" class="item">
                 <div class="icon">
-                  <img @load="loadImage" width="60" height="60" :src="item.imgurl">
+                  <img @load="loadImage" width="60" height="60" v-lazy="item.imgurl">
                 </div>
                 <div class="text">
                   <h2 class="name" v-html="item.creator.name"></h2>
@@ -28,11 +28,15 @@
           </ul>
     		</div>
       </div>
+      <div class="loading-container" v-show="!discList.length">
+          <loading></loading>
+      </div>
   	</scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import Loading from 'base/loading/loading'
 import Scroll from 'base/scroll/scroll'
 import Slider from 'base/slider/slider'
 import {getRecommend,getDiscList} from 'api/recommend'
@@ -69,8 +73,11 @@ export default {
 //在图片加载完毕之后再重新计算滚动高度
   loadImage(){
     if(!this.checkLoaded){
-      this.$refs.scroll.refresh();
-      this.checkLoaded = true;
+       this.checkLoaded = true;
+      setTimeout(() => {
+            this.$refs.scroll.refresh()
+          }, 20)
+      
     }
   }
 
@@ -78,7 +85,8 @@ export default {
  },
  components: {
  	Slider,
-  Scroll
+  Scroll,
+  Loading
  }
 }
  
