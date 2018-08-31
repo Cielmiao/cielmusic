@@ -2,6 +2,7 @@ import 'babel-polyfill'
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import store from './store'
 
 
 //把index样式引入进来
@@ -24,5 +25,6 @@ Vue.use(VueLazyLoad,{
 new Vue({
   el: '#app',
   router,
-  render: h => h(App) 
+  render: h => h(App),
+  store
 })
