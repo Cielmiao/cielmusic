@@ -79,9 +79,13 @@
         this.$emit('select', item)
       },
       onShortcutTouchStart(e) {
+      //获取到data-index的值
         let anchorIndex = getData(e.target, 'index')
+      //获取到手指第一次触碰到的位置
         let firstTouch = e.touches[0]
+      //在touch中定义一个第一次触碰到的位置的值，这样在另一个函数中也可以拿到这个值
         this.touch.y1 = firstTouch.pageY
+      //将当前点的是第几个索引记录下来
         this.touch.anchorIndex = anchorIndex
 
         this._scrollTo(anchorIndex)
@@ -89,7 +93,9 @@
       onShortcutTouchMove(e) {
         let firstTouch = e.touches[0]
         this.touch.y2 = firstTouch.pageY
+        //返回一个整数,就是第一个锚点和移动之后锚点的差值
         let delta = (this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT | 0
+        //获取到了两个索引的和
         let anchorIndex = parseInt(this.touch.anchorIndex) + delta
 
         this._scrollTo(anchorIndex)

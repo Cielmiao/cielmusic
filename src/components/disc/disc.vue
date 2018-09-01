@@ -6,21 +6,21 @@
 
 <script type="text/ecmascript-6">
   import MusicList from 'components/music-list/music-list'
-  import { getSingerDetail } from 'api/singer'
+  import { getSongList } from 'api/recommend'
   import { ERR_OK } from 'api/config'
-  import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
   import { mapGetters } from 'vuex'
+  import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
 
   export default {
     computed: {
       title() {
-        return this.singer.name
+        return this.disc.dissname
       },
       bgImage() {
-        return this.singer.avatar
+        return this.disc.imgurl
       },
       ...mapGetters([
-        'singer'
+        'disc'
       ])
     },
     data() {
@@ -29,17 +29,17 @@
       }
     },
     created() {
-      this._getDetail()
+      this._getSongList()
     },
     methods: {
-      _getDetail() {
-        if (!this.singer.id) {
-          this.$router.push('/singer')
+      _getSongList() {
+        if (!this.disc.dissid) {
+          this.$router.push('/recommend')
           return
         }
-        getSingerDetail(this.singer.id).then((res) => {
+        getSongList(this.disc.dissid).then((res) => {
           if (res.code === ERR_OK) {
-            processSongsUrl(this._normalizeSongs(res.data.list)).then((songs) => {
+            processSongsUrl(this._normalizeSongs(res.cdlist[0].songlist)).then((songs) => {
               this.songs = songs
             })
           }
@@ -47,8 +47,7 @@
       },
       _normalizeSongs(list) {
         let ret = []
-        list.forEach((item) => {
-          let {musicData} = item
+        list.forEach((musicData) => {
           if (isValidMusic(musicData)) {
             ret.push(createSong(musicData))
           }
