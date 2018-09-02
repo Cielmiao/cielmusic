@@ -27,17 +27,24 @@
           </div>
         </div>
         <div class="bottom">
-          <div class="operators">
-            <div class="icon i-left">
-              <i class="icon-sequence"></i>
+          <div class="progress-wrapper">
+            <span class="time time-l">{{format(currentTime)}}</span>
+            <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent" @percentChange="onProgressBarChange"></progress-bar>
             </div>
-            <div class="icon i-left">
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
+          </div>
+          <div class="operators">
+            <div class="icon i-left" @click="changeMode">
+              <i :class="iconMode"></i>
+            </div>
+            <div class="icon i-left" :class="disableCls">
               <i @click="prev" class="icon-prev"></i>
             </div>
-            <div class="icon i-center">
+            <div class="icon i-center" :class="disableCls">
               <i @click="togglePlaying" :class="playIcon"></i>
             </div>
-            <div class="icon i-right">
+            <div class="icon i-right" :class="disableCls">
               <i @click="next" class="icon-next"></i>
             </div>
             <div class="icon i-right">
@@ -59,14 +66,16 @@
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i @click.stop="togglePlaying" :class="miniIcon"></i>
+          <progress-circle :radius="32" :percent="percent">
+            <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i>
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error"></audio>
+    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
   </div>
 </template>
 
@@ -74,6 +83,12 @@
   import {mapGetters,mapMutations} from 'vuex'
   import animations from 'create-keyframe-animation'
   import { prefixStyle } from 'common/js/dom'
+  //进度条
+  import ProgressBar from 'base/progress-bar/progress-bar'
+  //mini圆形进度条
+  import ProgressCircle from 'base/progress-circle/progress-circle'
+  //播放模式的状态
+  import {playMode} from 'common/js/config'
 
 
   const transform = prefixStyle('transform')
@@ -82,7 +97,8 @@
   export default {
     data(){
       return {
-        songReady: false
+        songReady: false,
+        currentTime: 0
       }
     },
     computed: {
@@ -93,15 +109,27 @@
       playIcon(){
         return this.playing ? 'icon-pause' : 'icon-play'
       },
+    //改变播放模式的样式
+      iconMode(){
+        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+      },
       miniIcon(){
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      },
+      disableCls(){
+        return this.songReady ? '' : 'disable'
+      },
+      //计算出时间的比例，再传入progress-bar中
+      percent(){
+        return this.currentTime / this.currentSong.duration
       },
       ...mapGetters([
         'fullScreen',
         'playlist',
         'currentSong',
         'playing',
-        'currentIndex'
+        'currentIndex',
+        'mode'
       ])
     },
     methods: {
@@ -177,7 +205,7 @@
         if(!this.songReady){
           return
         }
-        let index = this.currentIndex + 1
+        let index = this.currentIndex - 1
         if(index === -1){
           index = this.playlist.length -1
         }
@@ -190,7 +218,38 @@
       ready(){
         this.songReady = true
       },
-      error(){},
+      error(){
+        this.songReady = true
+      },
+      updateTime(e){
+      //e.target.currentTime 表示当前播放的时间
+        this.currentTime = e.target.currentTime
+      },
+
+      //获取播放时间
+      format(interval){
+      //向下取整
+        interval = interval | 0
+        //获取分的时间
+        const minute = interval/60 | 0
+        //获取秒的时间,padStart(2, '0')可以在前面补0
+        const second = (interval % 60).toString().padStart(2, '0')
+        return `${minute}:${second}`
+      }, 
+      onProgressBarChange(percent){
+      //播放时间等于歌曲总时长*比例
+        this.$refs.audio.currentTime = this.currentSong.duration * percent
+      //如果拖动位置之后不是播放状态，就调动播放函数
+        if(!this.playing){
+          this.togglePlaying()
+        }
+      },
+      changeMode(){
+      //2%3,余数为2
+        const mode = (this.mode +1) % 3
+        //改变mode的值就改变样式
+        this.setPlayMode(mode)
+      },
        _getPosAndScale() {
         const targetWidth = 40
         const paddingLeft = 40
@@ -210,7 +269,8 @@
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
         setPlayingState: 'SET_PLAYING_STATE',
-        setCurrentIndex: 'SET_CURRENT_INDEX'
+        setCurrentIndex: 'SET_CURRENT_INDEX',
+        setPlayMode: 'SET_PLAY_MODE'
 
       })
     },
@@ -228,6 +288,10 @@
           newPlaying ? audio.play() : audio.pause()
         })
       }
+    },
+    components:{
+      ProgressBar,
+      ProgressCircle
     }
   }
   
@@ -376,7 +440,7 @@
           align-items: center
           width: 80%
           margin: 0px auto
-          padding: 10px 0
+          padding: 10px
           .time
             color: $color-text
             font-size: $font-size-small
