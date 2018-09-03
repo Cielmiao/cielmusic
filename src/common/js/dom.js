@@ -34,6 +34,7 @@ let vendor = (() => {
   return false
 })()
 
+//为样式加上webkit等前缀
 export function prefixStyle(style) {
   if (vendor === false) {
     return false

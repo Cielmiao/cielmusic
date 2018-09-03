@@ -52,7 +52,12 @@
       },
       //点击进度条歌曲快进到相应的位置
       progressClick(e){
-        this._offset(e.offsetX)
+      //获取按钮元素基于页面元素的上下左右的位置
+        const rect = this.$refs.progressBar.getBoundingClientRect()
+        const offsetWidth = e.pageX - rect.left
+        this._offset(offsetWidth)
+        //这里当我们点击进度条按钮时，e.offsetX获取不对
+        //this._offset(e.offsetX)
         this._triggerPercent()
       },
       //改变歌曲的播放时间
