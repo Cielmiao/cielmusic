@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend">
+  <div class="recommend" ref="recommend">
   	<scroll class="recommend-content" :data="discList" ref="scroll">
       <div>
     		<div v-if="recommends.length" class="slider-wrapper">
@@ -16,7 +16,7 @@
     				热门歌单推荐
     			</h1>
     			<ul> 
-              <li v-for="item in discList" class="item">
+              <li @click="selectItem(item)" v-for="item in discList" class="item">
                 <div class="icon">
                   <img @load="loadImage" width="60" height="60" v-lazy="item.imgurl">
                 </div>
@@ -32,6 +32,7 @@
           <loading></loading>
       </div>
   	</scroll>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -41,9 +42,12 @@ import Scroll from 'base/scroll/scroll'
 import Slider from 'base/slider/slider'
 import {getRecommend,getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
+import {playlistMixin} from 'common/js/mixin'
+import {mapMutations} from 'vuex'
 
 
 export default {
+  mixins: [playlistMixin],
 	data(){
 		return {
 			recommends: [],
@@ -55,6 +59,17 @@ export default {
 	this._getDiscList();
 	 },
  methods: {
+  handlePlaylist(playlist){
+        const bottom = playlist.length >0 ? '60px' : ''
+        this.$refs.recommend.style.bottom = bottom
+        this.$refs.scroll.refresh()
+      },
+  selectItem(item){
+    this.$router.push({
+      path: `/recommend/${item.dissid}`
+    })
+    this.setDisc(item)
+  },
  	_getRecommend(){
 	 	getRecommend().then((res) => {
 	 		if(res.code === ERR_OK){
@@ -79,7 +94,10 @@ export default {
           }, 20)
       
     }
-  }
+  },
+  ...mapMutations({
+    setDisc: 'SET_DISC'
+  })
 
 
  },

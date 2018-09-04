@@ -13,47 +13,49 @@
 
   export default {
     computed: {
-      title() {
+      title(){
         return this.disc.dissname
       },
-      bgImage() {
+      bgImage(){
         return this.disc.imgurl
       },
       ...mapGetters([
         'disc'
       ])
     },
-    data() {
-      return {
+    data(){
+      return{
         songs: []
       }
     },
-    created() {
+    created(){
       this._getSongList()
     },
     methods: {
-      _getSongList() {
-        if (!this.disc.dissid) {
+    //获取歌单列表数据
+      _getSongList(){
+        if(!this.disc.dissid){
           this.$router.push('/recommend')
           return
         }
         getSongList(this.disc.dissid).then((res) => {
-          if (res.code === ERR_OK) {
-            processSongsUrl(this._normalizeSongs(res.cdlist[0].songlist)).then((songs) => {
+          if(res.code === ERR_OK){
+           processSongsUrl(this._normalizeSongs(res.cdlist[0].songlist)).then((songs) => {
               this.songs = songs
             })
           }
         })
       },
-      _normalizeSongs(list) {
+      _normalizeSongs(list){
         let ret = []
         list.forEach((musicData) => {
-          if (isValidMusic(musicData)) {
+          if(musicData.songid &&  musicData.albumid){
             ret.push(createSong(musicData))
           }
         })
         return ret
       }
+
     },
     components: {
       MusicList
