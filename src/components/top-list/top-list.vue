@@ -42,11 +42,9 @@
           return
         }
         getMusicList(this.topList.id).then((res) => {
-          console.log(res.songlist)
           if (res.code === ERR_OK) {
              processSongsUrl(this._normalizeSongs(res.songlist)).then((songs) => {
               this.songs = songs
-              
           })
           }
         })

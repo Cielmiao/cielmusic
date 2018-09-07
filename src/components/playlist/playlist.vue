@@ -85,7 +85,9 @@
         }
         return ''
       },
+      //点击歌曲时切换到点击的这首歌
       selectItem(item, index) {
+      //如果是随机播放模式
         if (this.mode === playMode.random) {
           index = this.playlist.findIndex((song) => {
             return song.id === item.id
@@ -94,6 +96,7 @@
         this.setCurrentIndex(index)
         this.setPlayingState(true)
       },
+      //让列表滚动到当前播放歌曲
       scrollToCurrent(current) {
         const index = this.sequenceList.findIndex((song) => {
           return current.id === song.id

@@ -64,7 +64,9 @@
       search() {
         this.page = 1
         this.hasMore = true
+        //重新搜索数据的时候就重置滚动的位置为0
         this.$refs.suggest.scrollTo(0, 0)
+        //获取搜索数据
         search(this.query, this.page, this.showSinger, perpage).then((res) => {
           if (res.code === ERR_OK) {
             this._genResult(res.data).then((result) => {
@@ -91,6 +93,7 @@
       listScroll() {
         this.$emit('listScroll')
       },
+      //点击搜索出来的列表时
       selectItem(item) {
         if (item.type === TYPE_SINGER) {
           const singer = new Singer({
@@ -113,6 +116,7 @@
           return `${item.name}-${item.singer}`
         }
       },
+
       getIconCls(item) {
         if (item.type === TYPE_SINGER) {
           return 'icon-mine'
@@ -120,6 +124,7 @@
           return 'icon-music'
         }
       },
+      //获取到需要用到的数据
       _genResult(data) {
         let ret = []
         if (data.zhida && data.zhida.singerid && this.page === 1) {

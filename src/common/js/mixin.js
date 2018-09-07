@@ -43,24 +43,29 @@ export const playerMixin = {
     }
   },
   methods: {
-    changeMode() {
-      const mode = (this.mode + 1) % 3
-      this.setPlayMode(mode)
-      let list = null
-      if (mode === playMode.random) {
-        list = shuffle(this.sequenceList)
-      } else {
-        list = this.sequenceList
-      }
-      this.resetCurrentIndex(list)
-      this.setPlaylist(list)
-    },
-    resetCurrentIndex(list) {
-      let index = list.findIndex((item) => {
-        return item.id === this.currentSong.id
-      })
-      this.setCurrentIndex(index)
-    },
+    changeMode(){
+      //2%3,余数为2
+        const mode = (this.mode +1) % 3
+        //改变mode的值就改变样式
+        this.setPlayMode(mode)
+        let list = null
+        //当是随机播放时
+        if(mode === playMode.random){
+        //调用洗牌函数
+          list = shuffle(this.sequenceList)
+        }else{
+          list = this.sequenceList
+        }
+        this.resetCurrentIndex(list)
+        this.setPlayList(list)
+      },
+      //让改变播放模式时也不改变当前播放的歌曲
+      resetCurrentIndex(list){
+        let index = list.findIndex((item) => {
+          return item.id === this.currentSong.id
+        })
+        this.setCurrentIndex(index)
+      },
     toggleFavorite(song) {
       if (this.isFavorite(song)) {
         this.deleteFavoriteList(song)

@@ -70,6 +70,7 @@
         if (this.pullup) {
           this.scroll.on('scrollEnd', () => {
             if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+            //scrollToEnd  滚动到底部了
               this.$emit('scrollToEnd')
             }
           })
